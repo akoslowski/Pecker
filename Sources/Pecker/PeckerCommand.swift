@@ -76,7 +76,7 @@ private func createConfigurationPath(rootPath: AbsolutePath, config: String? = n
                 return absolutePath
             }
         }
-        throw PEError.findConfigFaild(message: "The specified config path does not exist")
+        throw PEError.findConfigFailed(message: "The specified config path does not exist")
     } else {
         return rootPath.appending(RelativePath(".pecker.yml"))
     }
@@ -112,5 +112,5 @@ enum PEError: Error {
     case fiendCurrentWorkingDirectoryFailed
     case findProjectFileFailed(message: String)
     case indexStorePathPathWrong
-    case findConfigFaild(message: String)
+    case findConfigFailed(message: String)
 }
