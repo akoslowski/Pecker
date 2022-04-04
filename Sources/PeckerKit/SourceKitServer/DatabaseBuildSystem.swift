@@ -7,9 +7,12 @@ struct DatabaseBuildSystem {
     
     /// The path to put the index database, if any.
     var indexDatabasePath: String?
-    
-    init(indexStorePath: String?, indexDatabasePath: String?) {
+
+    let xcodeAppPath: String
+
+    init(indexStorePath: String?, indexDatabasePath: String?, xcodeAppPath: String) {
         self.indexStorePath = indexStorePath
         self.indexDatabasePath = indexDatabasePath
+        self.xcodeAppPath = xcodeAppPath
     }
 }

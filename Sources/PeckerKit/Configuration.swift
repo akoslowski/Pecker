@@ -30,7 +30,9 @@ public struct Configuration {
     
     /// The project index database path
     public var indexDatabasePath: String
-    
+
+    public var xcodeAppPath: AbsolutePath
+
     internal init(projectPath: AbsolutePath,
                   indexStorePath: String,
                   rules: [Rule],
@@ -40,7 +42,8 @@ public struct Configuration {
                   excludedGroupName: [String],
                   blacklistFiles: [String],
                   blacklistSymbols: [String],
-                  outputFile: AbsolutePath) {
+                  outputFile: AbsolutePath,
+                  xcodeAppPath: AbsolutePath) {
         self.projectPath = projectPath
         self.indexStorePath = indexStorePath
         self.indexDatabasePath = NSTemporaryDirectory() + "index_\(getpid())"
@@ -52,6 +55,7 @@ public struct Configuration {
         self.blacklistFiles = blacklistFiles
         self.blacklistSymbols = blacklistSymbols
         self.outputFile = outputFile
+        self.xcodeAppPath = xcodeAppPath
     }
     
     public init(projectPath: AbsolutePath, indexStorePath: String = "", configPath: AbsolutePath) {
@@ -77,6 +81,8 @@ public struct Configuration {
         let excluded = (yamlConfiguration?.excluded ?? []).map {
             return AbsolutePath($0, relativeTo: projectPath)
         }.filter { localFileSystem.exists($0) }
+
+        let xcodeAppPath = createXcodeAppPath(path: yamlConfiguration?.xcodeAppPath, fileSystem: localFileSystem) ?? AbsolutePath("/Applications/Xcode.app")
         
         self.init(projectPath: projectPath,
                   indexStorePath: indexStorePath,
@@ -87,8 +93,16 @@ public struct Configuration {
                   excludedGroupName: yamlConfiguration?.excludedGroupName ?? [],
                   blacklistFiles: yamlConfiguration?.blacklistFiles ?? [],
                   blacklistSymbols: yamlConfiguration?.blacklistSymbols ?? [],
-                  outputFile: outputFilePath)
+                  outputFile: outputFilePath,
+                  xcodeAppPath: xcodeAppPath)
     }
+}
+
+private func createXcodeAppPath(path: String?, fileSystem: FileSystem) -> AbsolutePath? {
+    guard let path = path else { return nil }
+    let absolutePath = AbsolutePath(path)
+    guard fileSystem.exists(absolutePath) else { return nil }
+    return absolutePath
 }
 
 private func createOutputFilePath(projectPath: AbsolutePath, outputFile: String?) -> AbsolutePath {

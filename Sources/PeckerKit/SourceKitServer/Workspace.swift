@@ -3,8 +3,6 @@ import IndexStoreDB
 
 class Workspace {
     
-    static let libIndexStore = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib"
-        
     /// Build setup
     let buildSettings: DatabaseBuildSystem
 
@@ -14,11 +12,13 @@ class Workspace {
     /// The directory containing the original, unmodified project.
     init(buildSettings: DatabaseBuildSystem) throws {
         self.buildSettings = buildSettings
-        
+
+        let libIndexStoreDylibPath = buildSettings.xcodeAppPath.appending("/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib")
+
         if let storePath = buildSettings.indexStorePath,
             let dbPath = buildSettings.indexDatabasePath {
             do {
-                let lib = try IndexStoreLibrary(dylibPath: Workspace.libIndexStore)
+                let lib = try IndexStoreLibrary(dylibPath: libIndexStoreDylibPath)
                 self.index = try IndexStoreDB(
                     storePath: URL(fileURLWithPath: storePath).path,
                     databasePath: NSTemporaryDirectory() + "index_\(getpid())",
