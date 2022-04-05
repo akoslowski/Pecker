@@ -18,6 +18,9 @@ struct CommandLineOptions: ParsableArguments {
     /// The configuration file path
     @Option(help: "The path of the configuration file")
     var config: String?
+
+    @Option(help: "The path to Xcode.app")
+    var xcodeAppPath: String?
 }
 
 struct PeckerCommand: ParsableCommand {
@@ -59,7 +62,7 @@ private func createConfiguration(options: CommandLineOptions) throws -> Configur
     }
     let rootPath = AbsolutePath(options.path ?? "", relativeTo: cwd)
     let configPath = try createConfigurationPath(rootPath: rootPath, config: options.config)
-    let configuration = Configuration(projectPath: rootPath, indexStorePath: indexStorePath.asURL.path, configPath: configPath)
+    let configuration = Configuration(projectPath: rootPath, indexStorePath: indexStorePath.asURL.path, xcodeAppPath: options.xcodeAppPath, configPath: configPath)
 
     return configuration
 }

@@ -58,7 +58,7 @@ public struct Configuration {
         self.xcodeAppPath = xcodeAppPath
     }
     
-    public init(projectPath: AbsolutePath, indexStorePath: String = "", configPath: AbsolutePath) {
+    public init(projectPath: AbsolutePath, indexStorePath: String, xcodeAppPath: String?, configPath: AbsolutePath) {
         var yamlConfiguration: YamlConfiguration?
         do {
             let yamlContents = try String(contentsOfFile: configPath.asURL.path, encoding: .utf8)
@@ -82,8 +82,12 @@ public struct Configuration {
             return AbsolutePath($0, relativeTo: projectPath)
         }.filter { localFileSystem.exists($0) }
 
-        let xcodeAppPath = createXcodeAppPath(path: yamlConfiguration?.xcodeAppPath, fileSystem: localFileSystem) ?? AbsolutePath("/Applications/Xcode.app")
-        
+        let absoluteXcodeAppPath = createXcodeAppPath(
+            pathFromOptions: xcodeAppPath,
+            pathFromConfig: yamlConfiguration?.xcodeAppPath,
+            fileSystem: localFileSystem
+        )
+
         self.init(projectPath: projectPath,
                   indexStorePath: indexStorePath,
                   rules: rules,
@@ -94,11 +98,21 @@ public struct Configuration {
                   blacklistFiles: yamlConfiguration?.blacklistFiles ?? [],
                   blacklistSymbols: yamlConfiguration?.blacklistSymbols ?? [],
                   outputFile: outputFilePath,
-                  xcodeAppPath: xcodeAppPath)
+                  xcodeAppPath: absoluteXcodeAppPath)
     }
 }
 
-private func createXcodeAppPath(path: String?, fileSystem: FileSystem) -> AbsolutePath? {
+private func createXcodeAppPath(pathFromOptions: String?, pathFromConfig: String?, fileSystem: FileSystem) -> AbsolutePath {
+    if let absolutePath = absolutePathIfExists(path: pathFromOptions, fileSystem: localFileSystem) {
+        return absolutePath
+    } else if let absolutePath = absolutePathIfExists(path: pathFromConfig, fileSystem: localFileSystem) {
+        return absolutePath
+    } else {
+        return AbsolutePath("/Applications/Xcode.app")
+    }
+}
+
+private func absolutePathIfExists(path: String?, fileSystem: FileSystem) -> AbsolutePath? {
     guard let path = path else { return nil }
     let absolutePath = AbsolutePath(path)
     guard fileSystem.exists(absolutePath) else { return nil }
