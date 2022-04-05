@@ -35,9 +35,12 @@ class SourceCollector {
     func collect() {
         let files = computeContents()
         let safeSources = ThreadSafe<[SourceDetail]>([])
-        // The call to DispatchQueue.concurrentPerform crashes in visit(_:).
-        // Is SyntaxParser thread-safe?
-        // DispatchQueue.concurrentPerform(iterations: files.count)
+        // The call to `DispatchQueue.concurrentPerform` crashes with updated dependencies.
+        //   SUMMARY: ThreadSanitizer: data race (pecker:x86_64+0x10169cff6) in mdb_txn_renew0+0x3b6
+        //   static int mdb_txn_renew0(MDB_txn *txn)
+        //
+        // Original:
+        // DispatchQueue.concurrentPerform(iterations: files.count) { index in
         // Using a for-loop fixes the issue, but is slow.
         for (index, _) in files.enumerated() {
             let fileURL = files[index].asURL
