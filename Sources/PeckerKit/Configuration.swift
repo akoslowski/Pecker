@@ -108,7 +108,7 @@ private func createXcodeAppPath(pathFromOptions: String?, pathFromConfig: String
     } else if let absolutePath = absolutePathIfExists(path: pathFromConfig, fileSystem: localFileSystem) {
         return absolutePath
     } else {
-        return AbsolutePath("/Applications/Xcode.app")
+        return AbsolutePath("/Applications/Xcode.app/Contents/Developer")
     }
 }
 

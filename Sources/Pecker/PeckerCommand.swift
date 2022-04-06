@@ -19,7 +19,7 @@ struct CommandLineOptions: ParsableArguments {
     @Option(help: "The path of the configuration file")
     var config: String?
 
-    @Option(help: "The path to Xcode.app")
+    @Option(help: "The path to Xcode.app/Contents/Developer (use xcode-select -p)")
     var xcodeAppPath: String?
 }
 
