@@ -13,7 +13,7 @@ class Workspace {
     init(buildSettings: DatabaseBuildSystem) throws {
         self.buildSettings = buildSettings
 
-        let libIndexStoreDylibPath = buildSettings.xcodeAppPath.appending("/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib")
+        let libIndexStoreDylibPath = buildSettings.activeDeveloperDirectory.appending("/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib")
 
         if let storePath = buildSettings.indexStorePath,
             let dbPath = buildSettings.indexDatabasePath {
