@@ -32,9 +32,6 @@ public struct YamlConfiguration: Decodable {
     /// The path of the output  json file
     public let outputFile: String?
 
-    // The path to Xcode.app
-    public let xcodeAppPath: String?
-
     enum CodingKeys: String, CodingKey {
         case disabledRules = "disabled_rules"
         case reporter
@@ -46,7 +43,6 @@ public struct YamlConfiguration: Decodable {
         case blacklistSymbols = "blacklist_symbols"
         case blacklistSuperClass = "blacklist_superclass"
         case outputFile = "output_file"
-        case xcodeAppPath = "xcode_app_path"
     }
     
     public init(from decoder: Decoder) throws {
@@ -61,7 +57,6 @@ public struct YamlConfiguration: Decodable {
         self.blacklistSymbols = try container.decodeIfPresent([String].self, forKey: .blacklistSymbols)
         self.blacklistSuperClass = try container.decodeIfPresent([String].self, forKey: .blacklistSuperClass)
         self.outputFile = try container.decodeIfPresent(String.self, forKey: .outputFile)
-        self.xcodeAppPath = try container.decodeIfPresent(String.self, forKey: .xcodeAppPath)
     }
 }
 

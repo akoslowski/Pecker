@@ -84,7 +84,6 @@ public struct Configuration {
 
         let absoluteXcodeAppPath = createXcodeAppPath(
             pathFromOptions: xcodeAppPath,
-            pathFromConfig: yamlConfiguration?.xcodeAppPath,
             fileSystem: localFileSystem
         )
 
@@ -102,10 +101,8 @@ public struct Configuration {
     }
 }
 
-private func createXcodeAppPath(pathFromOptions: String?, pathFromConfig: String?, fileSystem: FileSystem) -> AbsolutePath {
+private func createXcodeAppPath(pathFromOptions: String?, fileSystem: FileSystem) -> AbsolutePath {
     if let absolutePath = absolutePathIfExists(path: pathFromOptions, fileSystem: localFileSystem) {
-        return absolutePath
-    } else if let absolutePath = absolutePathIfExists(path: pathFromConfig, fileSystem: localFileSystem) {
         return absolutePath
     } else {
         return AbsolutePath("/Applications/Xcode.app/Contents/Developer")
