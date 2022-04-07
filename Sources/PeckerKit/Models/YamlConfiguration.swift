@@ -31,7 +31,7 @@ public struct YamlConfiguration: Decodable {
     
     /// The path of the output  json file
     public let outputFile: String?
-    
+
     enum CodingKeys: String, CodingKey {
         case disabledRules = "disabled_rules"
         case reporter

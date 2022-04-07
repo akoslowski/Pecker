@@ -30,7 +30,10 @@ public struct Configuration {
     
     /// The project index database path
     public var indexDatabasePath: String
-    
+
+    /// The path of the active developer directory
+    public let activeDeveloperDirectory: AbsolutePath
+
     internal init(projectPath: AbsolutePath,
                   indexStorePath: String,
                   rules: [Rule],
@@ -40,7 +43,8 @@ public struct Configuration {
                   excludedGroupName: [String],
                   blacklistFiles: [String],
                   blacklistSymbols: [String],
-                  outputFile: AbsolutePath) {
+                  outputFile: AbsolutePath,
+                  activeDeveloperDirectory: AbsolutePath) {
         self.projectPath = projectPath
         self.indexStorePath = indexStorePath
         self.indexDatabasePath = NSTemporaryDirectory() + "index_\(getpid())"
@@ -52,9 +56,10 @@ public struct Configuration {
         self.blacklistFiles = blacklistFiles
         self.blacklistSymbols = blacklistSymbols
         self.outputFile = outputFile
+        self.activeDeveloperDirectory = activeDeveloperDirectory
     }
     
-    public init(projectPath: AbsolutePath, indexStorePath: String = "", configPath: AbsolutePath) {
+    public init(projectPath: AbsolutePath, indexStorePath: String, activeDeveloperDirectory: AbsolutePath, configPath: AbsolutePath) {
         var yamlConfiguration: YamlConfiguration?
         do {
             let yamlContents = try String(contentsOfFile: configPath.asURL.path, encoding: .utf8)
@@ -77,17 +82,20 @@ public struct Configuration {
         let excluded = (yamlConfiguration?.excluded ?? []).map {
             return AbsolutePath($0, relativeTo: projectPath)
         }.filter { localFileSystem.exists($0) }
-        
-        self.init(projectPath: projectPath,
-                  indexStorePath: indexStorePath,
-                  rules: rules,
-                  reporter: reporter,
-                  included: included,
-                  excluded: excluded ,
-                  excludedGroupName: yamlConfiguration?.excludedGroupName ?? [],
-                  blacklistFiles: yamlConfiguration?.blacklistFiles ?? [],
-                  blacklistSymbols: yamlConfiguration?.blacklistSymbols ?? [],
-                  outputFile: outputFilePath)
+
+        self.init(
+            projectPath: projectPath,
+            indexStorePath: indexStorePath,
+            rules: rules,
+            reporter: reporter,
+            included: included,
+            excluded: excluded ,
+            excludedGroupName: yamlConfiguration?.excludedGroupName ?? [],
+            blacklistFiles: yamlConfiguration?.blacklistFiles ?? [],
+            blacklistSymbols: yamlConfiguration?.blacklistSymbols ?? [],
+            outputFile: outputFilePath,
+            activeDeveloperDirectory: activeDeveloperDirectory
+        )
     }
 }
 

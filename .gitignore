@@ -5,3 +5,4 @@
 xcuserdata/
 portable_pecker.zip
 /*.bottle.tar.gz
+.swiftpm

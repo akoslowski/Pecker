@@ -16,7 +16,8 @@ public final class Analyzer {
                                               configuration: configuration)
         self.configuration = configuration
         let buildSystem = DatabaseBuildSystem(indexStorePath: configuration.indexStorePath,
-                                              indexDatabasePath: configuration.indexDatabasePath)
+                                              indexDatabasePath: configuration.indexDatabasePath,
+                                              activeDeveloperDirectory: configuration.activeDeveloperDirectory.pathString)
         workSpace = try Workspace(buildSettings: buildSystem)
         workSpace.index?.pollForUnitChangesAndWait()
         sourceKitserver = SourceKitServer(workspace: workSpace)
