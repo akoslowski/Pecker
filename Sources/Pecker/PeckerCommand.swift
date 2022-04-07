@@ -19,15 +19,15 @@ struct CommandLineOptions: ParsableArguments {
     @Option(help: "The path of the configuration file")
     var config: String?
 
-    @Option(help: "The path to Xcode.app/Contents/Developer (use xcode-select -p)")
-    var xcodeAppPath: String?
+    @Option(help: "The path of the active developer directory; Using 'xcode-select -p' is recommended")
+    var activeDeveloperDirectory: String = "/Applications/Xcode.app/Contents/Developer"
 }
 
 struct PeckerCommand: ParsableCommand {
     static var configuration = CommandConfiguration(
       commandName: "Pecker",
       abstract: "Detect unused Swift and Objective-C code",
-      version: "0.4.0"
+      version: "0.5.0"
     )
 
     @OptionGroup()
@@ -58,13 +58,30 @@ private func createConfiguration(options: CommandLineOptions) throws -> Configur
     }
     
     guard let cwd = localFileSystem.currentWorkingDirectory else {
-        throw PEError.fiendCurrentWorkingDirectoryFailed
+        throw PEError.findCurrentWorkingDirectoryFailed
     }
     let rootPath = AbsolutePath(options.path ?? "", relativeTo: cwd)
     let configPath = try createConfigurationPath(rootPath: rootPath, config: options.config)
-    let configuration = Configuration(projectPath: rootPath, indexStorePath: indexStorePath.asURL.path, xcodeAppPath: options.xcodeAppPath, configPath: configPath)
+
+    let activeDeveloperDirectory = try createActiveDeveloperDirectory(
+        path: options.activeDeveloperDirectory,
+        fileSystem: localFileSystem
+    )
+
+    let configuration = Configuration(
+        projectPath: rootPath,
+        indexStorePath: indexStorePath.asURL.path,
+        activeDeveloperDirectory: activeDeveloperDirectory,
+        configPath: configPath
+    )
 
     return configuration
+}
+
+private func createActiveDeveloperDirectory(path: String, fileSystem: FileSystem) throws -> AbsolutePath {
+    let absolutePath = AbsolutePath(path)
+    guard fileSystem.exists(absolutePath) else { throw PEError.activeDeveloperDirectoryNotFound(atPath: path) }
+    return absolutePath
 }
 
 private func createConfigurationPath(rootPath: AbsolutePath, config: String? = nil) throws -> AbsolutePath  {
@@ -112,7 +129,8 @@ enum ProcessError: Error {
 
 enum PEError: Error {
     case findIndexFailed(message: String)
-    case fiendCurrentWorkingDirectoryFailed
+    case activeDeveloperDirectoryNotFound(atPath: String)
+    case findCurrentWorkingDirectoryFailed
     case findProjectFileFailed(message: String)
     case indexStorePathPathWrong
     case findConfigFailed(message: String)

@@ -31,7 +31,8 @@ public struct Configuration {
     /// The project index database path
     public var indexDatabasePath: String
 
-    public var xcodeAppPath: AbsolutePath
+    /// The path of the active developer directory
+    public let activeDeveloperDirectory: AbsolutePath
 
     internal init(projectPath: AbsolutePath,
                   indexStorePath: String,
@@ -43,7 +44,7 @@ public struct Configuration {
                   blacklistFiles: [String],
                   blacklistSymbols: [String],
                   outputFile: AbsolutePath,
-                  xcodeAppPath: AbsolutePath) {
+                  activeDeveloperDirectory: AbsolutePath) {
         self.projectPath = projectPath
         self.indexStorePath = indexStorePath
         self.indexDatabasePath = NSTemporaryDirectory() + "index_\(getpid())"
@@ -55,10 +56,10 @@ public struct Configuration {
         self.blacklistFiles = blacklistFiles
         self.blacklistSymbols = blacklistSymbols
         self.outputFile = outputFile
-        self.xcodeAppPath = xcodeAppPath
+        self.activeDeveloperDirectory = activeDeveloperDirectory
     }
     
-    public init(projectPath: AbsolutePath, indexStorePath: String, xcodeAppPath: String?, configPath: AbsolutePath) {
+    public init(projectPath: AbsolutePath, indexStorePath: String, activeDeveloperDirectory: AbsolutePath, configPath: AbsolutePath) {
         var yamlConfiguration: YamlConfiguration?
         do {
             let yamlContents = try String(contentsOfFile: configPath.asURL.path, encoding: .utf8)
@@ -82,38 +83,20 @@ public struct Configuration {
             return AbsolutePath($0, relativeTo: projectPath)
         }.filter { localFileSystem.exists($0) }
 
-        let absoluteXcodeAppPath = createXcodeAppPath(
-            pathFromOptions: xcodeAppPath,
-            fileSystem: localFileSystem
+        self.init(
+            projectPath: projectPath,
+            indexStorePath: indexStorePath,
+            rules: rules,
+            reporter: reporter,
+            included: included,
+            excluded: excluded ,
+            excludedGroupName: yamlConfiguration?.excludedGroupName ?? [],
+            blacklistFiles: yamlConfiguration?.blacklistFiles ?? [],
+            blacklistSymbols: yamlConfiguration?.blacklistSymbols ?? [],
+            outputFile: outputFilePath,
+            activeDeveloperDirectory: activeDeveloperDirectory
         )
-
-        self.init(projectPath: projectPath,
-                  indexStorePath: indexStorePath,
-                  rules: rules,
-                  reporter: reporter,
-                  included: included,
-                  excluded: excluded ,
-                  excludedGroupName: yamlConfiguration?.excludedGroupName ?? [],
-                  blacklistFiles: yamlConfiguration?.blacklistFiles ?? [],
-                  blacklistSymbols: yamlConfiguration?.blacklistSymbols ?? [],
-                  outputFile: outputFilePath,
-                  xcodeAppPath: absoluteXcodeAppPath)
     }
-}
-
-private func createXcodeAppPath(pathFromOptions: String?, fileSystem: FileSystem) -> AbsolutePath {
-    if let absolutePath = absolutePathIfExists(path: pathFromOptions, fileSystem: localFileSystem) {
-        return absolutePath
-    } else {
-        return AbsolutePath("/Applications/Xcode.app/Contents/Developer")
-    }
-}
-
-private func absolutePathIfExists(path: String?, fileSystem: FileSystem) -> AbsolutePath? {
-    guard let path = path else { return nil }
-    let absolutePath = AbsolutePath(path)
-    guard fileSystem.exists(absolutePath) else { return nil }
-    return absolutePath
 }
 
 private func createOutputFilePath(projectPath: AbsolutePath, outputFile: String?) -> AbsolutePath {
